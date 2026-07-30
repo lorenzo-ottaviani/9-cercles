@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(first-circle-simple-server CXX)
+project(first-circle-simple-client CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,10 +13,10 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-finput-charset=UTF-8 -fexec-charset=UTF-8)
 endif()
 
-# === Simple Server ===
-file(GLOB SERVER_SOURCES "main.cpp")
-add_executable(simple-server ${SERVER_SOURCES})
-target_link_libraries(simple-server ws2_32)
+# === Simple Client ===
+file(GLOB CLIENT_SOURCES "main.cpp")
+add_executable(simple-client ${CLIENT_SOURCES})
+target_link_libraries(simple-client ws2_32)
 #include_directories(include)
 
 # Enable detailed build output
