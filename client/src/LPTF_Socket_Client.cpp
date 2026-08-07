@@ -129,16 +129,45 @@ void LPTF_Socket_Client::runClient() {
     }
 
     // Main Client Loop
-    while (true) {
-        // --- Step A: Action Input / Action Skip ---
-        // TODO: Implement temporary user input via std::cin or hit space/enter to skip.
-        // Later on, this section will silently query your application's state
-        // (such as player movements, keystrokes, or actions) instead of blocking the console.
+    std::string userInput;
 
-        // --- Step B: Silent Reception (recv) ---
-        // TODO: Implement the background recv() call to grab server instructions.
-        // Remember: Since this client is "silent" (sourde), we will parse these bytes internally
-        // to update the client's local memory, without printing anything to the console.
+    while (true) {
+        // Action Input
+        std::cout << "Enter message: ";
+        if (!std::getline(std::cin, userInput) || userInput == "quit") {
+            std::cout << "Exiting client...\n";
+            break;
+        }
+
+        if (!userInput.empty()) {
+            iResult = send(m_connectSocket, userInput.c_str(), static_cast<int>(userInput.length()), 0);
+            if (iResult == SOCKET_ERROR) {
+                std::cerr << "Send failed with error: " << WSAGetLastError() << '\n';
+                break;
+            }
+        }
+
+        // Silent Reception
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(m_connectSocket, &readfds);
+
+        timeval timeout{0, 0};
+
+        if (select(0, &readfds, NULL, NULL, &timeout) > 0) {
+            iResult = recv(m_connectSocket, recvbuf, recvbuflen - 1, 0);
+            if (iResult > 0) {
+                recvbuf[iResult] = '\0';
+
+            } else if (iResult == 0) {
+                std::cout << "Server disconnected gracefully.\n";
+                break;
+
+            } else if (WSAGetLastError() != WSAEWOULDBLOCK) {
+                std::cerr << "Recv failed with error: " << WSAGetLastError() << '\n';
+                break;
+            }
+        }
     }
 }
 
